@@ -119,7 +119,7 @@ resource "azurerm_lb" "kubernetes-lb" {
   }
 }
 
-resource "azurerm_lb_backend_address_pool" "example" {
+resource "azurerm_lb_backend_address_pool" "kubernetes-lb-pool" {
   loadbalancer_id = azurerm_lb.kubernetes-lb.id
   name            = "kubernetes-lb-pool"
 }
@@ -165,6 +165,13 @@ resource "azurerm_network_interface" "controller-nic" {
     private_ip_address            = "10.240.0.1${count.index}"
     public_ip_address_id          = azurerm_public_ip.kubernetes-pip-controllers[count.index].id
   }
+}
+
+resource "azurerm_network_interface_backend_address_pool_association" "kubernetes-lb-nic-association" {
+  count                   = 3
+  network_interface_id    = azurerm_network_interface.controller-nic[count.index].id
+  ip_configuration_name   = "internal"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.kubernetes-lb-pool.id
 }
 
 resource "azurerm_linux_virtual_machine" "controller-vm" {
