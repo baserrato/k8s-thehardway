@@ -10,7 +10,9 @@ on:
     - '*'
     - '!main'
 # validations only need to read
-permissions: read
+permissions: 
+  contents: read
+
 jobs:
   terraform:
     runs-on: ubuntu-latest
