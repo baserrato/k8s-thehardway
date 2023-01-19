@@ -1,0 +1,4 @@
+# terraform state and lockfiles
+terraform/.terraform*
+terraform/terraform*
+terraform/variables.tf
