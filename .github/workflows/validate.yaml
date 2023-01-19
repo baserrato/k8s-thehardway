@@ -1,5 +1,5 @@
 # Validating that Terraform code is proper
-Name: Terraform Validation
+name: Terraform Validation
 
 on: 
   pull_request:
