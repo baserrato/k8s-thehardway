@@ -8,8 +8,7 @@ on:
   push:
     branches:
     - '*'
-    branches-ignore:
-    - main
+    - '!main'
 # validations only need to read
 permissions: read
 jobs:
