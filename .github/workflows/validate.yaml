@@ -1,0 +1,46 @@
+# Validating that Terraform code is proper
+Name: Terraform Validation
+
+on: 
+  pull_request:
+    branches:
+      - main
+  
+  push:
+    branches:
+    - '*'
+    branches-ignore:
+    - main
+  
+# validations only need to read
+permissions: read
+
+jobs:
+  validate-resources:
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # list whatever Terraform versions here you would like to support
+        terraform:
+          - '1.2.*'
+    - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ matrix.terraform }}
+          terraform_wrapper: false
+      - run: go mod download
+      - env:
+          TF_ACC: "1"
+        run: |
+          make -C terraform/ plan
+        timeout-minutes: 10
