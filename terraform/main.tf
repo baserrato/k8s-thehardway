@@ -249,7 +249,8 @@ resource "azurerm_network_interface" "worker-nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.kubernetes-subnet.id
     private_ip_address_allocation = "Static"
-    private_ip_address            = "10.240.0.1${count.index}"
+    private_ip_address            = "10.240.0.2${count.index}"
+
     public_ip_address_id          = azurerm_public_ip.kubernetes-pip-workers[count.index].id
   }
 }
@@ -279,6 +280,9 @@ resource "azurerm_linux_virtual_machine" "worker-vm" {
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
+  }
+  tags = {
+    pod-cidr = "10.200.${count.index}.0/24"
   }
 }
 
