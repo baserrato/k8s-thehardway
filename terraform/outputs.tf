@@ -5,3 +5,7 @@ output "public-ip" {
 output "controller-pip" {
   value = [azurerm_public_ip.kubernetes-pip-controllers.*.ip_address]
 }
+
+output "worker-pip" {
+  value = [azurerm_public_ip.kubernetes-pip-workers.*.ip_address]
+}

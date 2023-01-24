@@ -1,4 +1,4 @@
-.PHONY= plan validate fmt apply init
+.PHONY= plan validate fmt apply init clean
 
 plan: init fmt validate
 	terraform $@
@@ -14,3 +14,8 @@ apply: fmt validate
 
 init:
 	terraform $@
+
+clean:
+	terraform destroy --auto-approve
+	rm -rf .terraform*
+	

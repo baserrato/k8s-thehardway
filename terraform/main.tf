@@ -250,7 +250,6 @@ resource "azurerm_network_interface" "worker-nic" {
     subnet_id                     = azurerm_subnet.kubernetes-subnet.id
     private_ip_address_allocation = "Static"
     private_ip_address            = "10.240.0.2${count.index}"
-
     public_ip_address_id          = azurerm_public_ip.kubernetes-pip-workers[count.index].id
   }
 }
