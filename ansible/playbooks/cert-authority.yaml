@@ -1,0 +1,46 @@
+---
+- hosts: 127.0.0.1
+  tasks:
+    - name: Create the CA configuration file
+      ansible.builtin.copy:
+        dest: ../certs-json/ca-config.json
+        content: |
+          {
+            "signing": {
+              "default": {
+                "expiry": "8760h"
+            },
+            "profiles": {
+              "kubernetes": {
+                "usages": ["signing", "key encipherment", "server auth", "client auth"],
+                "expiry": "8760h"
+                }
+              }
+            }
+          }
+
+    - name: Create the CA certificate signing request
+      ansible.builtin.copy:
+        dest: ../certs-json/ca-csr.json
+        content: |
+          {
+            "CN": "Kubernetes",
+            "key": {
+              "algo": "rsa",
+              "size": 4096
+            },
+            "names": [
+              {
+                "C": "US",
+                "L": "Chico",
+                "O": "Kubernetes",
+                "OU": "CA",
+                "ST": "California"
+              }
+            ]
+          }
+
+    - name: Generate the CA certificate and private key
+      ansible.builtin.shell: |
+        cfssl gencert -initca ../certs-json/ca-csr.json | cfssljson -bare ../cert-keys/ca
+

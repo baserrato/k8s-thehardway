@@ -1,0 +1,32 @@
+---
+- hosts: 127.0.0.1
+  tasks:
+    - name: Create the admin client certificate signing request
+      ansible.builtin.copy:
+        dest: ../certs-json/admin-csr.json
+        content: |
+          {
+            "CN": "admin",
+            "key": {
+              "algo": "rsa",
+              "size": 4096
+            },
+            "names": [
+              {
+                "C": "US",
+                "L": "Chico",
+                "O": "Kubernetes",
+                "OU": "CA",
+                "ST": "California"
+              }
+            ]
+          }
+
+    - name: Generate the admin client certificate and private key
+      ansible.builtin.shell: |
+        cfssl gencert \
+          -ca=../cert-keys/ca.pem \
+          -ca-key=../cert-keys/ca-key.pem \
+          -config=../certs-json/ca-config.json \
+          -profile=kubernetes \
+          ../certs-json/admin-csr.json | cfssljson -bare ../cert-keys/admin

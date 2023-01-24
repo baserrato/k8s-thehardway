@@ -3,3 +3,7 @@ terraform/.terraform*
 terraform/terraform*
 terraform/*.tfvars
 terraform/*.auto.tfvars
+
+# ansible json and pem files
+ansible/certs-json/
+ansible/cert-keys/
