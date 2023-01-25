@@ -30,3 +30,4 @@
           -config=../cert-json/ca-config.json \
           -profile=kubernetes \
           ../cert-json/admin-csr.json | cfssljson -bare ../cert-keys/admin
+
