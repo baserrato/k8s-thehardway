@@ -1,12 +1,12 @@
 ---
 - hosts: 127.0.0.1
   tasks:
-    - name: Create the admin client certificate signing request
+    - name: Create the kube scheduler certificate signing request
       ansible.builtin.copy:
-        dest: ../cert-json/admin-csr.json
+        dest: ../cert-json/kube-scheduler-csr.json
         content: |
           {
-            "CN": "admin",
+            "CN": "system:kube-scheduler",
             "key": {
               "algo": "rsa",
               "size": 4096
@@ -15,19 +15,18 @@
               {
                 "C": "US",
                 "L": "Chico",
-                "O": "Kubernetes",
-                "OU": "CA",
+                "O": "system:kube-scheduler",
+                "OU": "Kubernetes The Hard Way",
                 "ST": "California"
               }
             ]
           }
 
-    - name: Generate the admin client certificate and private key
+    - name: Generate the kube scheduler certificate and private key
       ansible.builtin.shell: |
         cfssl gencert \
           -ca=../cert-keys/ca.pem \
           -ca-key=../cert-keys/ca-key.pem \
           -config=../cert-json/ca-config.json \
           -profile=kubernetes \
-          ../cert-json/admin-csr.json | cfssljson -bare ../cert-keys/admin
-
+          ../cert-json/kube-scheduler-csr.json | cfssljson -bare ../cert-keys/kube-scheduler

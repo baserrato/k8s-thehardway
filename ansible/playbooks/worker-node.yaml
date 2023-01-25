@@ -1,0 +1,41 @@
+---
+- hosts: 127.0.0.1
+  tasks:
+    - name: Create the worker nodes certificate signing request
+      ansible.builtin.copy:
+        dest: ../cert-json/{{item.name}}-csr.json
+        content: |
+          {
+            "CN": "system:node:{{item.name}}",
+            "key": {
+              "algo": "rsa",
+              "size": 4096
+            },
+            "names": [
+              {
+                "C": "CA",
+                "L": "Chico",
+                "O": "system:nodes",
+                "OU": "Kubernetes The Hard Way",
+                "ST": "California"
+              }
+            ]
+          }
+      loop:
+        - name: worker-0
+        - name: worker-1
+
+    - name: Generate the worker nodes certificate and private key
+      ansible.builtin.shell: |
+        EXTERNAL_IP=$(az network public-ip show -g kubernetes -n kubernetes-pip --query ipAddress -o tsv)
+        INTERNAL_IP=$(az vm show -d -n {{item.name}} -g kubernetes --query privateIps -o tsv)
+        cfssl gencert \
+          -ca=../cert-keys/ca.pem \
+          -ca-key=../cert-keys/ca-key.pem \
+          -config=../cert-json/ca-config.json \
+          -hostname={{item.name}},${EXTERNAL_IP},${INTERNAL_IP} \
+          -profile=kubernetes \
+          ../cert-json/{{item.name}}-csr.json | cfssljson -bare ../cert-keys/{{item.name}}
+      loop: 
+        - name: worker-0
+        - name: worker-1
