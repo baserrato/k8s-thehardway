@@ -5,5 +5,5 @@ terraform/*.tfvars
 terraform/*.auto.tfvars
 
 # ansible json and pem files
-ansible/certs-json/
+ansible/cert-json/
 ansible/cert-keys/
