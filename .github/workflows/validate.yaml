@@ -1,5 +1,5 @@
-# Validating that Terraform code is proper
-name: Terraform Validation
+# Validating that Terraform and Ansible code is proper
+name: Validation
 
 on: 
   pull_request:
@@ -8,7 +8,6 @@ on:
   push:
     branches:
     - '*'
-    - '!main'
 # validations only need to read
 permissions: 
   contents: read
@@ -16,7 +15,7 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    name: validation
+    name: Terraform Validation
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
@@ -39,3 +38,11 @@ jobs:
         run: |
             make -C terraform/ plan
         timeout-minutes: 10
+
+  ansible:
+    runs-on: ubuntu-latest
+    name: ansible-checks
+    steps:
+      - uses: actions/checkout@v3
+        run: |
+          make -C ansible/ check

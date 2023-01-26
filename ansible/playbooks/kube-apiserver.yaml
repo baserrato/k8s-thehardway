@@ -1,0 +1,35 @@
+---
+- hosts: 127.0.0.1
+  tasks:
+    - name: Create the kube api server certificate signing request
+      ansible.builtin.copy:
+        dest: ../cert-json/kubernetes-csr.json
+        content: |
+          {
+            "CN": "kubernetes",
+            "key": {
+              "algo": "rsa",
+              "size": 4096
+            },
+            "names": [
+              {
+                "C": "US",
+                "L": "Chico",
+                "O": "Kubernetes",
+                "OU": "Kubernetes The Hard Way",
+                "ST": "California"
+              }
+            ]
+          }
+
+    - name: Generate the kubernetes api server certificate and private key
+      ansible.builtin.shell: |
+        KUBERNETES_PUBLIC_ADDRESS=$(az network public-ip show -g kubernetes -n kubernetes-pip --query "ipAddress" -o tsv)
+        KUBERNETES_HOSTNAMES=kubernetes,kubernetes.default,kubernetes.default.svc,kubernetes.default.svc.cluster,kubernetes.svc.cluster.local
+        cfssl gencert \
+          -ca=../cert-keys/ca.pem \
+          -ca-key=../cert-keys/ca-key.pem \
+          -config=../cert-json/ca-config.json \
+          -hostname=10.32.0.1,10.240.0.10,10.240.0.11,10.240.0.12,${KUBERNETES_PUBLIC_ADDRESS},127.0.0.1,${KUBERNETES_HOSTNAMES} \
+          -profile=kubernetes \
+          ../cert-json/kubernetes-csr.json | cfssljson -bare ../cert-keys/kubernetes
