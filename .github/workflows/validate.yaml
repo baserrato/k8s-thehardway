@@ -28,12 +28,17 @@ jobs:
         terraform:
           - '1.2.*'
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform Version Matrix
       - uses: hashicorp/setup-terraform@v2
         with:
             terraform_version: ${{ matrix.terraform }}
             terraform_wrapper: false
-      - env:
+      
+      - name: Run Terraform Plan
+        env:
             TF_ACC: "1"
         run: |
             make -C terraform/ plan
@@ -43,7 +48,10 @@ jobs:
     runs-on: ubuntu-latest
     name: ansible-checks
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run an Ansible Check On Playbooks
         run: |
           make -C ansible/ check
         timeout-minutes: 10
