@@ -53,5 +53,5 @@ jobs:
 
       - name: Run an Ansible Check On Playbooks
         run: |
-          make -C ansible/ check
+            make -C ansible/ check
         timeout-minutes: 10
