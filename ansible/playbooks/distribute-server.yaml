@@ -1,0 +1,11 @@
+---
+- hosts: 127.0.0.1
+  tasks:
+    - name:
+      ansible.builtin.shell:
+        PUBLIC_IP_ADDRESS=$(az network public-ip show -g kubernetes -n {{item.name}}-pip --query "ipAddress" -o tsv)
+        scp -o StrictHostKeyChecking=no ../cert-keys/ca.pem ../cert-keys/ca-key.pem ../cert-keys/kubernetes-key.pem ../cert-keys/kubernetes.pem ../cert-keys/service-account-key.pem ../cert-keys/service-account.pem kuberoot@${PUBLIC_IP_ADDRESS}:~/
+      loop:
+        - name: controller-0
+        - name: controller-1
+        - name: controller-2
