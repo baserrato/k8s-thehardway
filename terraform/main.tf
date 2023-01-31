@@ -209,6 +209,13 @@ resource "tls_private_key" "kubernetes-controller-key" {
   rsa_bits  = 4096
 }
 
+resource "local_file" "controller-private-key" {
+  count           = 2
+  content         = tls_private_key.kubernetes-controller-key[count.index].private_key_pem
+  filename        = "../aks-keys/controller-key${count.index}.pem"
+  file_permission = "0600"
+}
+
 # Setting up Worker nodes
 resource "azurerm_availability_set" "worker-as" {
   name                = "worker-as"
@@ -289,4 +296,11 @@ resource "tls_private_key" "kubernetes-worker-key" {
   count     = 2
   algorithm = "RSA"
   rsa_bits  = 4096
+}
+
+resource "local_file" "worker-private-key" {
+  count           = 2
+  content         = tls_private_key.kubernetes-worker-key[count.index].private_key_pem
+  filename        = "../aks-keys/worker-key${count.index}.pem"
+  file_permission = "0600"
 }
