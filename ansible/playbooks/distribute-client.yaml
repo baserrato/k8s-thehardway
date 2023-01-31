@@ -1,10 +1,13 @@
 ---
 - hosts: 127.0.0.1
   tasks:
-    - name:
-      ansible.builtin.shell:
+    - name: Distribute keys to worker nodes
+      ansible.builtin.shell: |
         PUBLIC_IP_ADDRESS=$(az network public-ip show -g kubernetes -n {{item.name}}-pip --query "ipAddress" -o tsv)
-        scp -o StrictHostKeyChecking=no ../cert-keys/ca.pem ../cert-keys/{{item.name}}-key.pem ../cert-keys/{{item.name}}.pem kuberoot@${PUBLIC_IP_ADDRESS}:~/
+        scp -i ${HOST_KEY}/{{item.name}}.pem -o StrictHostKeyChecking=no ${KEY_PATH}/ca.pem ${KEY_PATH}/{{item.name}}-key.pem ${KEY_PATH}/{{item.name}}.pem kuberoot@${PUBLIC_IP_ADDRESS}:~/
       loop:
         - name: worker-0
         - name: worker-1
+      environment:
+        KEY_PATH: ../cert-keys
+        HOST_KEY: ../../aks-keys

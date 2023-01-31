@@ -21,3 +21,13 @@ variable "subscription-id" {
   default   = null
   sensitive = true
 }
+
+variable "controller-count" {
+  type    = number
+  default = 0
+}
+
+variable "worker-count" {
+  type    = number
+  default = 0
+}
