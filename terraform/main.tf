@@ -1,17 +1,3 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "=3.0.0"
-    }
-  }
-}
-
-# Configure the Microsoft Azure Provider
-provider "azurerm" {
-  features {}
-}
-
 resource "azurerm_resource_group" "kubernetes" {
   name     = "kubernetes"
   location = "westus"
@@ -139,7 +125,7 @@ resource "azurerm_availability_set" "controller-as" {
 }
 
 resource "azurerm_public_ip" "kubernetes-pip-controllers" {
-  count               = 3
+  count               = var.controller-count
   name                = "controller-${count.index}-pip"
   location            = azurerm_resource_group.kubernetes.location
   resource_group_name = azurerm_resource_group.kubernetes.name
@@ -154,7 +140,7 @@ resource "azurerm_public_ip" "kubernetes-pip-controllers" {
 }
 
 resource "azurerm_network_interface" "controller-nic" {
-  count               = 3
+  count               = var.controller-count
   name                = "controller-${count.index}-nic"
   location            = azurerm_resource_group.kubernetes.location
   resource_group_name = azurerm_resource_group.kubernetes.name
@@ -169,14 +155,14 @@ resource "azurerm_network_interface" "controller-nic" {
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "kubernetes-lb-nic-association" {
-  count                   = 3
+  count                   = var.controller-count
   network_interface_id    = azurerm_network_interface.controller-nic[count.index].id
   ip_configuration_name   = "internal"
   backend_address_pool_id = azurerm_lb_backend_address_pool.kubernetes-lb-pool.id
 }
 
 resource "azurerm_linux_virtual_machine" "controller-vm" {
-  count                 = 3
+  count                 = var.controller-count
   name                  = "controller-${count.index}"
   location              = azurerm_resource_group.kubernetes.location
   resource_group_name   = azurerm_resource_group.kubernetes.name
@@ -204,15 +190,15 @@ resource "azurerm_linux_virtual_machine" "controller-vm" {
 }
 
 resource "tls_private_key" "kubernetes-controller-key" {
-  count     = 3
+  count     = var.controller-count
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "local_file" "controller-private-key" {
-  count           = 2
+  count           = var.controller-count
   content         = tls_private_key.kubernetes-controller-key[count.index].private_key_pem
-  filename        = "../aks-keys/controller-key${count.index}.pem"
+  filename        = "../aks-keys/controller-${count.index}.pem"
   file_permission = "0600"
 }
 
@@ -232,7 +218,7 @@ resource "azurerm_availability_set" "worker-as" {
 
 
 resource "azurerm_public_ip" "kubernetes-pip-workers" {
-  count               = 2
+  count               = var.worker-count
   name                = "worker-${count.index}-pip"
   location            = azurerm_resource_group.kubernetes.location
   resource_group_name = azurerm_resource_group.kubernetes.name
@@ -247,7 +233,7 @@ resource "azurerm_public_ip" "kubernetes-pip-workers" {
 }
 
 resource "azurerm_network_interface" "worker-nic" {
-  count               = 2
+  count               = var.worker-count
   name                = "worker-${count.index}-nic"
   location            = azurerm_resource_group.kubernetes.location
   resource_group_name = azurerm_resource_group.kubernetes.name
@@ -262,7 +248,7 @@ resource "azurerm_network_interface" "worker-nic" {
 }
 
 resource "azurerm_linux_virtual_machine" "worker-vm" {
-  count                 = 2
+  count                 = var.worker-count
   name                  = "worker-${count.index}"
   location              = azurerm_resource_group.kubernetes.location
   resource_group_name   = azurerm_resource_group.kubernetes.name
@@ -293,14 +279,14 @@ resource "azurerm_linux_virtual_machine" "worker-vm" {
 }
 
 resource "tls_private_key" "kubernetes-worker-key" {
-  count     = 2
+  count     = var.worker-count
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "local_file" "worker-private-key" {
-  count           = 2
+  count           = var.worker-count
   content         = tls_private_key.kubernetes-worker-key[count.index].private_key_pem
-  filename        = "../aks-keys/worker-key${count.index}.pem"
+  filename        = "../aks-keys/worker-${count.index}.pem"
   file_permission = "0600"
 }
